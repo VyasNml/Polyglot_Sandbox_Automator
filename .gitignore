@@ -7,8 +7,6 @@ temp.js
 
 .env
 
-Dockerfile*
-
 *.log
 
 .redis
