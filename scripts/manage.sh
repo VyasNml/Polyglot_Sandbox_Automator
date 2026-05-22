@@ -32,31 +32,37 @@ case "$1" in
     echo "Waiting for startup..."
     sleep 5
 
-    echo "Python test..."
+    echo "Testing Python execution..."
 
-    curl -X POST http://localhost:3000/execute \
+    PYTHON_RESPONSE=$(curl -s -X POST http://localhost:3000/execute \
     -H "Content-Type: application/json" \
-    -d "{\"language\":\"python\",\"code\":\"print('hello')\"}"
+    -d "{\"language\":\"python\",\"code\":\"print('Hello World')\"}")
+
+    echo "$PYTHON_RESPONSE"
 
     echo ""
 
-    echo "Node test..."
+    echo "Testing Node.js execution..."
 
-    curl -X POST http://localhost:3000/execute \
+    NODE_RESPONSE=$(curl -s -X POST http://localhost:3000/execute \
     -H "Content-Type: application/json" \
-    -d "{\"language\":\"node\",\"code\":\"console.log('hello')\"}"
+    -d "{\"language\":\"node\",\"code\":\"console.log('Hello World')\"}")
+
+    echo "$NODE_RESPONSE"
 
     echo ""
+
+    echo "Stopping services..."
+    docker compose down
     ;;
 
   clean)
     echo "Cleaning containers/images..."
 
-    docker compose down
+    docker compose down --rmi local --volumes --remove-orphans
 
-    docker rm -f $(docker ps -aq) 2>/dev/null
-
-    docker image prune -f
+    rm -f temp.py
+    rm -f temp.js
     ;;
 
   logs)
