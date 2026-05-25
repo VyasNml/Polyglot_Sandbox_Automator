@@ -7,6 +7,7 @@ export const executeNode = async (code: string): Promise<string> => {
     const filePath = path.join(process.cwd(), "temp.js");
 
     fs.writeFileSync(filePath, code);
+    console.log(filePath);
 
     return new Promise((resolve, reject) => {
 

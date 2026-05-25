@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="How the Polyglot Sandbox Automator works — request lifecycle, container provisioning, execution, and teardown." />
+  <title>Working · Polyglot Sandbox Automator</title>
+
+  <script>
+    (function(){
+      var t = localStorage.getItem('psa-theme');
+      if (!t) t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="../css/variables.css" />
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/navbar.css" />
+  <link rel="stylesheet" href="../css/pages.css" />
+
+  <style>
+    .arch-diagram {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-xl);
+      padding: var(--space-2xl);
+      margin: var(--space-2xl) 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+      align-items: center;
+    }
+
+    .arch-row {
+      display: flex;
+      gap: var(--space-md);
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .arch-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-lg);
+      padding: 14px 20px;
+      text-align: center;
+      min-width: 120px;
+      transition: all var(--transition-normal);
+    }
+    .arch-box:hover {
+      border-color: var(--border-accent);
+      box-shadow: var(--shadow-hover);
+    }
+    .arch-box-icon { font-size: 1.4rem; margin-bottom: 4px; }
+    .arch-box-label {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .arch-box-sub {
+      font-size: 0.66rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .arch-arrow {
+      font-size: 1.2rem;
+      color: var(--text-accent);
+    }
+
+    .arch-box.accent-box {
+      border-color: var(--border-accent);
+      background: rgba(0, 212, 160, 0.06);
+    }
+  </style>
+</head>
+
+<body class="working-page">
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar" role="navigation" aria-label="Main navigation">
+  <div class="navbar-inner">
+    <a href="../index.html" class="navbar-logo" aria-label="PSA Home">
+      <div class="navbar-logo-icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+          <line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/>
+        </svg>
+      </div>
+      <span class="navbar-logo-text">PSA<span>Polyglot Sandbox Automator</span></span>
+    </a>
+    <ul class="navbar-links" role="list">
+      <li><a href="../index.html" id="nav-home">Home</a></li>
+      <li><a href="demo.html" id="nav-demo">Demo</a></li>
+      <li><a href="working.html" class="active" id="nav-working">Working</a></li>
+      <li><a href="docs.html" id="nav-docs">Docs / Learnings</a></li>
+      <li><a href="about.html" id="nav-about">About Project</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="btn-github" id="btn-github" aria-label="GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+        <span class="btn-text">GitHub</span>
+      </a>
+      <button class="btn-theme" id="btn-theme-desktop" aria-label="Toggle theme"></button>
+      <button class="navbar-hamburger" id="navbar-hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="navbar-mobile">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+  <div class="navbar-mobile" id="navbar-mobile" role="menu">
+    <a href="../index.html" role="menuitem">Home</a>
+    <a href="demo.html" role="menuitem">Demo</a>
+    <a href="working.html" role="menuitem">Working</a>
+    <a href="docs.html" role="menuitem">Docs / Learnings</a>
+    <a href="about.html" role="menuitem">About Project</a>
+    <div class="navbar-mobile-actions">
+      <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-sm">GitHub ↗</a>
+      <button class="btn-theme" id="btn-theme-mobile" aria-label="Toggle theme"></button>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <!-- Hero -->
+  <section class="page-hero" aria-labelledby="working-heading">
+    <div class="page-hero-bg-grid" aria-hidden="true"></div>
+    <div class="page-hero-orb" aria-hidden="true"></div>
+    <div class="page-hero-content">
+      <div class="page-hero-tag">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span class="page-hero-tag-text">System Architecture</span>
+      </div>
+      <h1 class="page-hero-title" id="working-heading">How It Works</h1>
+      <p class="page-hero-desc">
+        From API request to isolated execution and teardown —
+        a full walkthrough of the sandbox lifecycle and the orchestration
+        layer that makes it reliable and secure.
+      </p>
+      <div class="page-hero-actions">
+        <a href="demo.html" class="btn btn-primary">Try the Demo</a>
+        <a href="docs.html" class="btn btn-ghost">Read the Docs</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Architecture diagram -->
+  <section class="working-section" aria-label="Architecture diagram">
+    <div class="container">
+      <div class="section-eyebrow reveal">Architecture Overview</div>
+      <h2 style="font-size:1.6rem;margin-bottom:var(--space-sm);" class="reveal">Request Lifecycle</h2>
+      <p style="color:var(--text-secondary);font-size:0.9rem;max-width:600px;margin-bottom:0;" class="reveal">
+        Each execution request travels through a well-defined pipeline of validation,
+        provisioning, execution, and cleanup.
+      </p>
+
+      <div class="arch-diagram reveal">
+        <div class="arch-row">
+          <div class="arch-box">
+            <div class="arch-box-icon">🖥️</div>
+            <div class="arch-box-label">Client</div>
+            <div class="arch-box-sub">Browser / API caller</div>
+          </div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-box accent-box">
+            <div class="arch-box-icon">⚡</div>
+            <div class="arch-box-label">FastAPI</div>
+            <div class="arch-box-sub">REST endpoint</div>
+          </div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-box">
+            <div class="arch-box-icon">🔍</div>
+            <div class="arch-box-label">Validator</div>
+            <div class="arch-box-sub">Input sanitization</div>
+          </div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-box accent-box">
+            <div class="arch-box-icon">🐋</div>
+            <div class="arch-box-label">Docker Engine</div>
+            <div class="arch-box-sub">Container manager</div>
+          </div>
+        </div>
+        <div class="arch-arrow" style="transform:rotate(90deg);" aria-hidden="true">→</div>
+        <div class="arch-row" style="flex-direction: row-reverse;">
+          <div class="arch-box">
+            <div class="arch-box-icon">🗑️</div>
+            <div class="arch-box-label">Teardown</div>
+            <div class="arch-box-sub">Container destroyed</div>
+          </div>
+          <div class="arch-arrow">←</div>
+          <div class="arch-box">
+            <div class="arch-box-icon">📊</div>
+            <div class="arch-box-label">Result Aggregator</div>
+            <div class="arch-box-sub">stdout / metrics</div>
+          </div>
+          <div class="arch-arrow">←</div>
+          <div class="arch-box accent-box">
+            <div class="arch-box-icon">⚙️</div>
+            <div class="arch-box-label">Sandbox</div>
+            <div class="arch-box-sub">Isolated execution</div>
+          </div>
+          <div class="arch-arrow">←</div>
+          <div class="arch-box">
+            <div class="arch-box-icon">📦</div>
+            <div class="arch-box-label">Image Pull</div>
+            <div class="arch-box-sub">Lang-specific image</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Step-by-step -->
+  <section class="working-section" style="padding-top:0;" aria-labelledby="steps-heading">
+    <div class="container">
+      <div class="section-eyebrow reveal">Step by Step</div>
+      <h2 style="font-size:1.6rem;margin-bottom:var(--space-2xl);" class="reveal" id="steps-heading">Execution Pipeline</h2>
+
+      <div class="working-steps" role="list">
+
+        <div class="working-step reveal" role="listitem">
+          <div class="working-step-num" aria-label="Step 1">01</div>
+          <div class="working-step-content">
+            <h3 class="working-step-title">Client Sends Execution Request</h3>
+            <p class="working-step-desc">
+              The client (browser or API consumer) sends a <code>POST /api/execute</code> request
+              with the code payload, language identifier, and optional configuration like timeout
+              duration or memory limits. All requests are validated against a strict schema.
+            </p>
+          </div>
+        </div>
+
+        <div class="working-step reveal" role="listitem">
+          <div class="working-step-num" aria-label="Step 2">02</div>
+          <div class="working-step-content">
+            <h3 class="working-step-title">FastAPI Validates and Routes</h3>
+            <p class="working-step-desc">
+              The FastAPI backend validates the payload, sanitizes inputs, and routes the
+              request to the appropriate language handler. Language-specific Docker images
+              are selected (e.g., <code>python:3.12-slim</code>, <code>gcc:latest</code>).
+            </p>
+          </div>
+        </div>
+
+        <div class="working-step reveal" role="listitem">
+          <div class="working-step-num" aria-label="Step 3">03</div>
+          <div class="working-step-content">
+            <h3 class="working-step-title">Container is Provisioned</h3>
+            <p class="working-step-desc">
+              Using the Docker SDK for Python, a new ephemeral container is spawned with
+              strict resource constraints: CPU limits, memory caps, no network access, and
+              read-only filesystem mounts. Each container is assigned a unique execution ID.
+            </p>
+          </div>
+        </div>
+
+        <div class="working-step reveal" role="listitem">
+          <div class="working-step-num" aria-label="Step 4">04</div>
+          <div class="working-step-content">
+            <h3 class="working-step-title">Code is Injected and Executed</h3>
+            <p class="working-step-desc">
+              The user's code is written to a temporary file and mounted into the container.
+              The sandbox runs the appropriate interpreter or compiler. A timeout watchdog
+              monitors execution duration and sends <code>SIGKILL</code> if the limit is exceeded.
+            </p>
+          </div>
+        </div>
+
+        <div class="working-step reveal" role="listitem">
+          <div class="working-step-num" aria-label="Step 5">05</div>
+          <div class="working-step-content">
+            <h3 class="working-step-title">Results are Captured</h3>
+            <p class="working-step-desc">
+              stdout, stderr, exit code, execution time, and memory consumption are collected
+              by the result aggregator. The data is structured into a JSON response payload
+              and returned to the client with appropriate HTTP status codes.
+            </p>
+          </div>
+        </div>
+
+        <div class="working-step reveal" role="listitem">
+          <div class="working-step-num" aria-label="Step 6">06</div>
+          <div class="working-step-content">
+            <h3 class="working-step-title">Container is Destroyed</h3>
+            <p class="working-step-desc">
+              Post-execution, the container is immediately removed (<code>docker rm --force</code>).
+              No state persists between executions. The ephemeral design ensures complete
+              isolation and prevents any residual data leakage between users.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="../js/theme.js"></script>
+<script src="../js/navbar.js"></script>
+<script src="../js/animations.js"></script>
+</body>
+</html>

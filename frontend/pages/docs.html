@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Docs and learnings for Polyglot Sandbox Automator — API reference, architecture notes, and technical learnings." />
+  <title>Docs / Learnings · Polyglot Sandbox Automator</title>
+
+  <script>
+    (function(){
+      var t = localStorage.getItem('psa-theme');
+      if (!t) t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="../css/variables.css" />
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/navbar.css" />
+  <link rel="stylesheet" href="../css/pages.css" />
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar" role="navigation" aria-label="Main navigation">
+  <div class="navbar-inner">
+    <a href="../index.html" class="navbar-logo" aria-label="PSA Home">
+      <div class="navbar-logo-icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+          <line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/>
+        </svg>
+      </div>
+      <span class="navbar-logo-text">PSA<span>Polyglot Sandbox Automator</span></span>
+    </a>
+    <ul class="navbar-links" role="list">
+      <li><a href="../index.html" id="nav-home">Home</a></li>
+      <li><a href="demo.html" id="nav-demo">Demo</a></li>
+      <li><a href="working.html" id="nav-working">Working</a></li>
+      <li><a href="docs.html" class="active" id="nav-docs">Docs / Learnings</a></li>
+      <li><a href="about.html" id="nav-about">About Project</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="btn-github" id="btn-github" aria-label="GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+        <span class="btn-text">GitHub</span>
+      </a>
+      <button class="btn-theme" id="btn-theme-desktop" aria-label="Toggle theme"></button>
+      <button class="navbar-hamburger" id="navbar-hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="navbar-mobile">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+  <div class="navbar-mobile" id="navbar-mobile" role="menu">
+    <a href="../index.html" role="menuitem">Home</a>
+    <a href="demo.html" role="menuitem">Demo</a>
+    <a href="working.html" role="menuitem">Working</a>
+    <a href="docs.html" role="menuitem">Docs / Learnings</a>
+    <a href="about.html" role="menuitem">About Project</a>
+    <div class="navbar-mobile-actions">
+      <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-sm">GitHub ↗</a>
+      <button class="btn-theme" id="btn-theme-mobile" aria-label="Toggle theme"></button>
+    </div>
+  </div>
+</nav>
+
+<!-- Docs layout -->
+<div class="docs-layout">
+
+  <!-- Sidebar -->
+  <aside class="docs-sidebar" aria-label="Documentation navigation">
+    <div class="docs-sidebar-section">
+      <div class="docs-sidebar-title">Getting Started</div>
+      <nav class="docs-sidebar-links">
+        <a href="#overview" class="active">Overview</a>
+        <a href="#quickstart">Quick Start</a>
+        <a href="#installation">Installation</a>
+      </nav>
+    </div>
+    <div class="docs-sidebar-section">
+      <div class="docs-sidebar-title">API Reference</div>
+      <nav class="docs-sidebar-links">
+        <a href="#api-execute">POST /execute</a>
+        <a href="#api-status">GET /status</a>
+        <a href="#api-languages">GET /languages</a>
+      </nav>
+    </div>
+    <div class="docs-sidebar-section">
+      <div class="docs-sidebar-title">Architecture</div>
+      <nav class="docs-sidebar-links">
+        <a href="#sandbox-design">Sandbox Design</a>
+        <a href="#resource-limits">Resource Limits</a>
+        <a href="#security">Security Model</a>
+      </nav>
+    </div>
+    <div class="docs-sidebar-section">
+      <div class="docs-sidebar-title">Learnings</div>
+      <nav class="docs-sidebar-links">
+        <a href="#learnings">Key Learnings</a>
+        <a href="#challenges">Challenges</a>
+        <a href="#future">Future Work</a>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="docs-main" id="docs-content" aria-label="Documentation content">
+    <article class="docs-article">
+
+      <div class="section-eyebrow" style="margin-bottom:var(--space-md);">Documentation</div>
+
+      <h1 id="overview">Polyglot Sandbox Automator</h1>
+      <p>
+        The Polyglot Sandbox Automator (PSA) is a backend-centric platform for executing
+        arbitrary code across multiple programming languages inside isolated Docker containers.
+        It is designed for use cases such as online judges, code playgrounds, and automated
+        testing pipelines.
+      </p>
+
+      <div class="docs-callout">
+        <strong>Note:</strong> This documentation is actively being maintained as the
+        project develops. API contracts may change before stable release.
+      </div>
+
+      <h2 id="quickstart">Quick Start</h2>
+      <p>Send a POST request to the execution endpoint with your code and language:</p>
+
+      <div class="docs-code-block">
+POST /api/execute HTTP/1.1
+Content-Type: application/json
+
+{
+  "language": "python",
+  "code": "print('Hello, Sandbox!')",
+  "timeout": 10,
+  "memory_limit": "256m"
+}
+      </div>
+
+      <p>Response:</p>
+      <div class="docs-code-block">
+{
+  "status": "success",
+  "exit_code": 0,
+  "stdout": "Hello, Sandbox!\n",
+  "stderr": "",
+  "execution_time_ms": 142,
+  "memory_used_mb": 12.4,
+  "container_id": "psa-a1b2c3d4"
+}
+      </div>
+
+      <h2 id="installation">Installation</h2>
+      <p>Prerequisites: Python 3.12+, Docker Engine, pip.</p>
+      <div class="docs-code-block">
+# Clone the repository
+git clone https://github.com/your-repo/polyglot-sandbox-automator.git
+cd polyglot-sandbox-automator
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Start the API server
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+      </div>
+
+      <h2 id="api-execute">POST /api/execute</h2>
+      <p>Submit code for execution inside an isolated Docker sandbox.</p>
+      <div class="docs-code-block">
+Parameters:
+  language     string   required   "python" | "cpp" | "java"
+  code         string   required   Source code to execute
+  timeout      integer  optional   Max execution seconds (default: 30)
+  memory_limit string   optional   Docker memory limit (default: "256m")
+      </div>
+
+      <h2 id="api-languages">GET /api/languages</h2>
+      <p>Returns a list of supported languages and their Docker image mappings.</p>
+      <div class="docs-code-block">
+{
+  "languages": [
+    { "id": "python", "version": "3.12", "image": "python:3.12-slim" },
+    { "id": "cpp",    "version": "14",   "image": "gcc:latest" },
+    { "id": "java",   "version": "21",   "image": "openjdk:21-slim" }
+  ]
+}
+      </div>
+
+      <h2 id="sandbox-design">Sandbox Design</h2>
+      <p>
+        Each execution request spawns a new, ephemeral Docker container. The container has
+        no network access, a read-only filesystem (except for the injected code file), and
+        is governed by Linux cgroups for CPU and memory resource enforcement.
+      </p>
+      <p>
+        After execution completes (or the timeout fires), the container is unconditionally
+        removed. No execution state persists between runs.
+      </p>
+
+      <h2 id="resource-limits">Resource Limits</h2>
+      <div class="docs-code-block">
+Default limits per container:
+  CPU:    0.5 cores  (--cpus=0.5)
+  Memory: 256 MB     (--memory=256m)
+  Timeout: 30 seconds
+  Network: disabled  (--network=none)
+  PID limit: 64      (--pids-limit=64)
+      </div>
+
+      <h2 id="security">Security Model</h2>
+      <p>
+        The sandbox uses Docker's default seccomp profile and drops all Linux capabilities
+        except those needed for execution. User code runs as a non-root user inside the
+        container. Combined with network isolation and cgroup limits, this provides a
+        reasonable security boundary for untrusted code execution.
+      </p>
+
+      <div class="docs-callout" style="border-left-color:#ffbd2e;background:rgba(255,189,46,0.06);border-color:rgba(255,189,46,0.2);">
+        <strong>Warning:</strong> PSA is not intended for production use with fully untrusted
+        code without additional hardening. Consider gVisor or Kata Containers for higher
+        security requirements.
+      </div>
+
+      <h2 id="learnings">Key Learnings</h2>
+      <p>Building PSA surfaced several important architectural and operational lessons:</p>
+      <ul style="padding-left:1.2rem;color:var(--text-secondary);font-size:0.92rem;line-height:1.9;">
+        <li>Docker image pull latency is a major contributor to cold-start time. Pre-warming images on startup is essential.</li>
+        <li>cgroups v2 behavior differs significantly from v1 in how memory limits are enforced and reported.</li>
+        <li>FastAPI's async architecture pairs naturally with Docker SDK's async client for non-blocking execution handling.</li>
+        <li>PID limits are critical — without them, fork bombs can exhaust the host's process table even within a container.</li>
+        <li>Seccomp filtering adds measurable security with minimal performance overhead (typically &lt;3%).</li>
+      </ul>
+
+      <h2 id="challenges">Challenges</h2>
+      <p>
+        The most significant technical challenge was handling timeout enforcement reliably.
+        A naive <code>asyncio.wait_for</code> approach failed for C++ programs that caught
+        SIGTERM. The final solution combines Docker's <code>stop_timeout</code> parameter
+        with a fallback <code>kill()</code> after a grace period.
+      </p>
+
+      <h2 id="future">Future Work</h2>
+      <ul style="padding-left:1.2rem;color:var(--text-secondary);font-size:0.92rem;line-height:1.9;">
+        <li>WebSocket support for streaming stdout in real-time</li>
+        <li>Execution queue with priority scheduling</li>
+        <li>Additional language support: Go, Rust, JavaScript (Node.js)</li>
+        <li>Metrics dashboard with Prometheus + Grafana integration</li>
+        <li>Container pre-warming pool to minimize cold-start latency</li>
+      </ul>
+
+    </article>
+  </main>
+</div>
+
+<script src="../js/theme.js"></script>
+<script src="../js/navbar.js"></script>
+<script>
+  // Highlight active sidebar link on scroll
+  document.addEventListener('DOMContentLoaded', () => {
+    const sections = document.querySelectorAll('[id]');
+    const sidebarLinks = document.querySelectorAll('.docs-sidebar-links a');
+
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          sidebarLinks.forEach(a => {
+            a.classList.toggle('active', a.getAttribute('href') === '#' + entry.target.id);
+          });
+        }
+      });
+    }, { rootMargin: '-60px 0px -70% 0px' });
+
+    sections.forEach(s => obs.observe(s));
+  });
+</script>
+</body>
+</html>

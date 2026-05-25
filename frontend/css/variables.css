@@ -1,0 +1,117 @@
+/* ============================================================
+   DESIGN TOKENS — POLYGLOT SANDBOX AUTOMATOR
+   ============================================================ */
+
+:root {
+  /* Brand accent */
+  --accent-primary:   #00d4a0;   /* teal-green */
+  --accent-secondary: #0ea5e9;   /* sky-blue   */
+  --accent-glow:      rgba(0, 212, 160, 0.18);
+  --accent-glow-blue: rgba(14, 165, 233, 0.18);
+
+  /* Typography */
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  --font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+  /* Radius */
+  --radius-sm:  4px;
+  --radius-md:  8px;
+  --radius-lg:  12px;
+  --radius-xl:  18px;
+
+  /* Transitions */
+  --transition-fast:   0.15s ease;
+  --transition-normal: 0.25s ease;
+  --transition-slow:   0.4s ease;
+
+  /* Spacing scale */
+  --space-xs:  4px;
+  --space-sm:  8px;
+  --space-md:  16px;
+  --space-lg:  24px;
+  --space-xl:  40px;
+  --space-2xl: 64px;
+  --space-3xl: 96px;
+  --space-4xl: 128px;
+
+  /* Z-index scale */
+  --z-navbar:  1000;
+  --z-overlay: 900;
+  --z-modal:   1100;
+
+  /* Max container width */
+  --container-max: 1200px;
+}
+
+/* ── DARK THEME (default) ── */
+[data-theme="dark"],
+:root {
+  --bg-base:        #0d0f14;
+  --bg-surface:     #141720;
+  --bg-elevated:    #1a1f2e;
+  --bg-card:        #151920;
+  --bg-card-hover:  #1c2030;
+
+  --border-subtle:  rgba(255, 255, 255, 0.06);
+  --border-default: rgba(255, 255, 255, 0.10);
+  --border-accent:  rgba(0, 212, 160, 0.30);
+
+  --text-primary:   #e8eaf0;
+  --text-secondary: #8892a4;
+  --text-muted:     #4f5a6e;
+  --text-accent:    #00d4a0;
+
+  --nav-bg:         rgba(13, 15, 20, 0.82);
+  --nav-border:     rgba(255, 255, 255, 0.07);
+
+  --btn-primary-bg:   #00d4a0;
+  --btn-primary-text: #0d0f14;
+  --btn-ghost-bg:     transparent;
+  --btn-ghost-border: rgba(255, 255, 255, 0.15);
+  --btn-ghost-text:   #e8eaf0;
+
+  --shadow-card:   0 1px 3px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+  --shadow-hover:  0 4px 20px rgba(0, 212, 160, 0.12);
+  --shadow-glow:   0 0 32px rgba(0, 212, 160, 0.15);
+
+  --grid-line: rgba(255, 255, 255, 0.025);
+
+  --scrollbar-track: #0d0f14;
+  --scrollbar-thumb: #2a3040;
+}
+
+/* ── LIGHT THEME ── */
+[data-theme="light"] {
+  --bg-base:        #f4f6fa;
+  --bg-surface:     #ffffff;
+  --bg-elevated:    #f9fafb;
+  --bg-card:        #ffffff;
+  --bg-card-hover:  #f0f4ff;
+
+  --border-subtle:  rgba(0, 0, 0, 0.05);
+  --border-default: rgba(0, 0, 0, 0.10);
+  --border-accent:  rgba(0, 180, 140, 0.35);
+
+  --text-primary:   #0f1723;
+  --text-secondary: #4b5a6e;
+  --text-muted:     #8c9baa;
+  --text-accent:    #00a87f;
+
+  --nav-bg:         rgba(255, 255, 255, 0.88);
+  --nav-border:     rgba(0, 0, 0, 0.08);
+
+  --btn-primary-bg:   #00a87f;
+  --btn-primary-text: #ffffff;
+  --btn-ghost-bg:     transparent;
+  --btn-ghost-border: rgba(0, 0, 0, 0.15);
+  --btn-ghost-text:   #0f1723;
+
+  --shadow-card:   0 1px 4px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06);
+  --shadow-hover:  0 4px 20px rgba(0, 168, 127, 0.14);
+  --shadow-glow:   0 0 32px rgba(0, 168, 127, 0.10);
+
+  --grid-line: rgba(0, 0, 0, 0.04);
+
+  --scrollbar-track: #f4f6fa;
+  --scrollbar-thumb: #c8d0da;
+}
