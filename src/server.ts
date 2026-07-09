@@ -1,6 +1,5 @@
 import express from "express";
-import { executePython } from "./services/pythonExecutor";
-import { executeNode } from "./services/nodeExecutor";
+import { executeCode } from "./Executor";
 
 const app = express();
 
@@ -12,20 +11,7 @@ app.post("/execute", async (req, res) => {
 
         const { code, language } = req.body;
 
-        let output = "";
-
-        if (language === "python") {
-            output = await executePython(code);
-        }
-        else if (language === "node") {
-            output = await executeNode(code);
-        }
-        else {
-            return res.json({
-                success: false,
-                error: "Unsupported language"
-            });
-        }
+        const output = await executeCode(language, code);
 
         return res.json({
             success: true,
@@ -38,7 +24,9 @@ app.post("/execute", async (req, res) => {
             success: false,
             error
         });
+
     }
+
 });
 
 app.listen(3000, () => {
