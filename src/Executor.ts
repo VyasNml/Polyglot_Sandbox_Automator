@@ -19,20 +19,33 @@ export const executeCode = async (
     language: keyof typeof languageConfig,
     code: string
 ): Promise<string> => {
-
+    
     const config = languageConfig[language];
-
+    
+    console.log("====================================");    //comment
+    console.log(`[Executor] Starting ${language} execution`);   //comment
+    
     if (!config) {
         throw new Error("Unsupported language");
     }
 
     const fileName = `temp.${config.extension}`;
-    const filePath = path.join(process.cwd(), fileName);
+    const filePath = path.join("/workspace", fileName);
 
+    console.log(`[Executor] Creating temporary file: ${filePath}`);     //comment
     fs.writeFileSync(filePath, code);
+    console.log("[Executor] Temporary file created successfully.");     //comment
 
     return new Promise((resolve, reject) => {
 
+        const workspaceVolume = process.env.WORKSPACE_VOLUME;
+
+        if (!workspaceVolume) {
+            reject("Workspace volume is not configured.");
+            return;
+        }
+
+        console.log("[Executor] Starting Docker container...");     //comment
         const dockerProcess = spawn(
             "docker",
             [
@@ -41,10 +54,10 @@ export const executeCode = async (
                 "--cpus=0.5",
                 "--rm",
                 "-v",
-                `${process.cwd()}:/app`,
+                `${workspaceVolume}:/workspace`,
                 config.image,
                 config.command,
-                `/app/${fileName}`
+                `/workspace/${fileName}`
             ]
         );
 
@@ -52,11 +65,15 @@ export const executeCode = async (
         let errorOutput = "";
 
         dockerProcess.stdout.on("data", (data: Buffer) => {
-            output += data.toString();
+            const text = data.toString();
+            output += text;
+            console.log(`[Container STDOUT] ${text.trim()}`);   //comment
         });
 
         dockerProcess.stderr.on("data", (data: Buffer) => {
-            errorOutput += data.toString();
+            const text = data.toString();
+            errorOutput += text;
+            console.log(`[Container STDERR] ${text.trim()}`);   //comment
         });
 
         const timeout = setTimeout(() => {
