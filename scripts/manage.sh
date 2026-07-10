@@ -61,8 +61,6 @@ case "$1" in
 
     docker compose down --rmi local --volumes --remove-orphans
 
-    rm -f temp.py
-    rm -f temp.js
     ;;
 
   logs)

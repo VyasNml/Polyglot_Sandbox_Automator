@@ -1,6 +1,7 @@
 import { spawn } from "child_process";
 import fs from "fs";
 import path from "path";
+import crypto from "crypto";
 
 const languageConfig = {
     python: {
@@ -15,6 +16,8 @@ const languageConfig = {
     }
 };
 
+const EXECUTION_TIMEOUT_MS = 5000;
+
 export const executeCode = async (
     language: keyof typeof languageConfig,
     code: string
@@ -22,7 +25,6 @@ export const executeCode = async (
     
     const config = languageConfig[language];
     
-    console.log("====================================");    //comment
     console.log(`[Executor] Starting ${language} execution`);   //comment
     
     if (!config) {
@@ -46,10 +48,15 @@ export const executeCode = async (
         }
 
         console.log("[Executor] Starting Docker container...");     //comment
+
+        const containerName = `sandbox-${language}-${crypto.randomUUID()}`;
+
         const dockerProcess = spawn(
             "docker",
             [
                 "run",
+                "--name",
+                containerName,
                 "--memory=256m",
                 "--cpus=0.5",
                 "--rm",
@@ -77,31 +84,36 @@ export const executeCode = async (
         });
 
         const timeout = setTimeout(() => {
-
             dockerProcess.kill();
 
+            spawn("docker", ["kill", containerName]);
+            
             if (fs.existsSync(filePath)) {
                 fs.unlinkSync(filePath);
             }
-
+            
             reject("Execution timed out");
 
-        }, 5000);
+        }, EXECUTION_TIMEOUT_MS);
 
-        dockerProcess.on("close", () => {
-
+        dockerProcess.on("close", (code, signal) => {
+            
             clearTimeout(timeout);
 
             if (fs.existsSync(filePath)) {
                 fs.unlinkSync(filePath);
             }
 
+            if (code === 137) {
+                reject("Memory limit exceeded");
+                return;
+            }
+        
             if (errorOutput) {
                 reject(errorOutput);
             } else {
                 resolve(output);
             }
-
         });
 
     });
