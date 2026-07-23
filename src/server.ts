@@ -1,9 +1,12 @@
 import express from "express";
 import { executeCode } from "./Executor";
+import { redisClient } from "./redis";
+import { rateLimiter } from "./rateLimiter";
 
 const app = express();
 
 app.use(express.json());
+app.use(rateLimiter);
 
 app.post("/execute", async (req, res) => {
 
@@ -29,6 +32,13 @@ app.post("/execute", async (req, res) => {
 
 });
 
-app.listen(3000, () => {
-    console.log("Server running on port 3000");
-});
+async function startServer() {
+    await redisClient.connect();
+    console.log("[Redis] Connected");
+
+    app.listen(3000, () => {
+        console.log("Server running on port 3000");
+    });
+}
+
+startServer();
